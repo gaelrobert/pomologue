@@ -98,6 +98,18 @@
     <section id="screen-library" class="screen" hidden>
       <h1 data-t="libraryTitle"></h1>
       <p class="lead" data-t="libraryLead"></p>
+      <h2 data-t="harvestTitle"></h2>
+      <p class="save-lead" data-t="harvestLead"></p>
+      <p class="save-lead" id="harvest-direct" data-t="harvestDirect" hidden></p>
+      <label class="button">
+        <span data-t="harvestImport"></span>
+        <input id="harvest-file" type="file" accept=".zip,application/zip,application/x-zip-compressed" multiple>
+      </label>
+      <p class="status" id="harvest-status" role="status"></p>
+      <p class="status-detail" id="harvest-detail" hidden></p>
+      <div id="harvest-list"></div>
+      <button class="link" id="harvest-forget" type="button" data-t="harvestForget" hidden></button>
+      <h2 data-t="savedTitle"></h2>
       <div id="library"></div>
       <div class="actions">
         <button class="button" id="library-back" type="button" data-t="back"></button>
@@ -114,6 +126,7 @@
     <span data-t="creditBooklet"></span>
   </footer>
   <script src="labelled.js"></script>
+  <script src="carnet.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

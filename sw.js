@@ -3,13 +3,14 @@
 // Other apps on the same website (such as Carnet de récolte) share this storage, so only
 // caches with this prefix are ever removed.
 const PREFIX = 'pomologue-';
-const CACHE = `${PREFIX}v3`;
+const CACHE = `${PREFIX}v4`;
 const SHELL = [
   './',
   'index.html',
   'app.css',
   'app.js',
   'labelled.js',
+  'carnet.js',
   'worker.js',
   'manifest.webmanifest',
   'icons/icon-192.png',

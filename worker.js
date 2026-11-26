@@ -136,7 +136,9 @@ function project(vector) {
   return normalise(out);
 }
 
-async function identify(pixels) {
+/* The model's description of a photo. Saved and harvest photos keep it, and it does not change
+   when the catalogue is rebuilt. */
+async function describe(pixels) {
   const side = config.inputSize;
   const input = new Float32Array(3 * side * side);
   for (let i = 0, n = side * side; i < n; i++) {
@@ -144,13 +146,16 @@ async function identify(pixels) {
       input[c * n + i] = (pixels[i * 4 + c] / 255 - config.mean[c]) / config.std[c];
     }
   }
-  const started = performance.now();
   const output = await session.run({
     pixel_values: new ort.Tensor('float32', input, [1, 3, side, side]),
   });
   const tensor = output.last_hidden_state;
-  // Saved photos keep this description, which does not change when the catalogue is rebuilt.
-  const description = embedding(tensor.data, tensor.dims[2]);
+  return embedding(tensor.data, tensor.dims[2]);
+}
+
+async function identify(pixels) {
+  const started = performance.now();
+  const description = await describe(pixels);
   if (transform && description.length !== config.inputDimensions) throw new Error('Embedding size mismatch');
   const query = transform ? project(description) : description;
   if (query.length !== config.dimensions) throw new Error('Embedding size mismatch');
@@ -177,9 +182,15 @@ self.onmessage = async ({ data }) => {
       const result = await identify(data.pixels);
       self.postMessage({ type: 'result', ...result }, [result.vector.buffer]);
     }
+    if (data.type === 'describe') {
+      // A harvest photo: only its description is needed.
+      const vector = await describe(data.pixels);
+      self.postMessage({ type: 'described', id: data.id, vector }, [vector.buffer]);
+    }
   } catch (error) {
     self.postMessage({
       type: 'error',
+      id: data.id ?? null,
       step: error.step || (data.type === 'init' ? 'engine' : 'photo'),
       message: String((error && error.message) || error),
     });

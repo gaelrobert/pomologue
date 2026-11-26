@@ -33,7 +33,7 @@ const STRINGS = {
     unsure: 'Suggestions à vérifier',
     unsureName: 'Variétés les plus proches',
     sureNote: 'C’est la référence la plus proche. Vérifiez-la avant de l’étiqueter.',
-    unsureNote: 'Aucune n’est assez sûre pour nommer cette pomme. Enregistrez des photos de vos arbres connus : le téléphone apprendra à reconnaître vos variétés.',
+    unsureNote: 'Aucune n’est assez sûre pour nommer cette pomme. Importez les photos du Carnet de récolte, ou enregistrez des photos de vos arbres connus : le téléphone apprendra à reconnaître vos variétés.',
     unsureNoteMine: 'Aucune n’est assez sûre pour nommer cette pomme. Comparez-les avec le fruit avant d’étiqueter l’arbre.',
     closest: 'Les plus proches au catalogue',
     use: 'Usage',
@@ -41,6 +41,7 @@ const STRINGS = {
     alias: 'Synonymes',
     mineTitle: 'Les plus proches parmi vos photos',
     photoCount: (n) => (n > 1 ? `${n} photos enregistrées` : '1 photo enregistrée'),
+    harvestCount: (n) => (n > 1 ? `${n} photos du carnet` : '1 photo du carnet'),
     saveTitle: 'Vous connaissez cette variété ?',
     saveLead: 'Enregistrez la photo sous son nom : le téléphone s’en servira pour reconnaître les prochaines.',
     saveName: 'Nom de la variété',
@@ -48,10 +49,30 @@ const STRINGS = {
     saved: (name) => `Photo enregistrée sous « ${name} ».`,
     undo: 'Annuler',
     saveFailed: 'La photo n’a pas pu être enregistrée sur ce téléphone.',
-    libraryOpen: (n) => `Vos photos enregistrées (${n})`,
-    libraryTitle: 'Vos photos enregistrées',
-    libraryLead: 'Elles restent sur ce téléphone et servent à reconnaître vos variétés. Retirez toute photo enregistrée sous le mauvais nom.',
-    libraryEmpty: 'Aucune photo enregistrée pour l’instant.',
+    libraryOpen: (n) => (n ? `Vos photos (${n})` : 'Vos photos'),
+    libraryTitle: 'Vos photos',
+    libraryLead: 'Elles restent sur ce téléphone et servent à reconnaître vos variétés.',
+    harvestTitle: 'Photos du Carnet de récolte',
+    harvestLead: 'Dans le Carnet de récolte, ouvrez Sauvegarde, cochez « Inclure les photos déjà sauvegardées » et enregistrez le ou les fichiers. Importez-les ici : Pomologue garde une petite image et la description de chaque photo.',
+    harvestImport: 'Importer une sauvegarde du carnet',
+    harvestReading: 'Lecture de la sauvegarde…',
+    harvestWaiting: 'Les photos seront décrites dès que le modèle sera prêt.',
+    harvestProgress: (done, total) => `Description des photos du carnet : ${done} sur ${total}…`,
+    harvestDone: (added, known) => {
+      const first = added > 1 ? `${added} photos ajoutées` : added === 1 ? '1 photo ajoutée' : 'Aucune nouvelle photo';
+      const second = known > 1 ? `, ${known} déjà présentes` : known === 1 ? ', 1 déjà présente' : '';
+      return `${first}${second}.`;
+    },
+    harvestFailed: (n) => (n > 1 ? `${n} photos n’ont pas pu être lues.` : '1 photo n’a pas pu être lue.'),
+    harvestFull: 'Le téléphone n’a plus assez de place pour garder ces photos.',
+    notBackup: 'Ce fichier n’est pas une sauvegarde du Carnet de récolte.',
+    unreadable: 'Cette sauvegarde n’a pas pu être lue.',
+    harvestDirect: 'Les photos du Carnet de récolte de ce téléphone sont lues directement : les nouvelles arrivent toutes seules.',
+    harvestEmpty: 'Aucune photo du carnet pour l’instant.',
+    harvestForget: 'Oublier les photos importées',
+    harvestForgetConfirm: (n) => `Oublier les ${n} photos importées ? Elles restent dans le Carnet de récolte.`,
+    savedTitle: 'Enregistrées dans Pomologue',
+    libraryEmpty: 'Aucune photo enregistrée ici pour l’instant.',
     remove: 'Retirer',
     removeConfirm: (name) => `Retirer cette photo de « ${name} » ?`,
     back: 'Retour',
@@ -88,7 +109,7 @@ const STRINGS = {
     unsure: 'Suggestions to check',
     unsureName: 'Closest varieties',
     sureNote: 'This is the closest reference. Check it before labelling the tree.',
-    unsureNote: 'None is reliable enough to name this apple. Save photos of trees you know: the phone will learn to recognise your varieties.',
+    unsureNote: 'None is reliable enough to name this apple. Import your photos from Carnet de récolte, or save photos of trees you know: the phone will learn to recognise your varieties.',
     unsureNoteMine: 'None is reliable enough to name this apple. Compare them with the fruit before labelling the tree.',
     closest: 'Closest in the catalogue',
     use: 'Use',
@@ -96,6 +117,7 @@ const STRINGS = {
     alias: 'Synonyms',
     mineTitle: 'Closest among your photos',
     photoCount: (n) => (n > 1 ? `${n} saved photos` : '1 saved photo'),
+    harvestCount: (n) => (n > 1 ? `${n} harvest photos` : '1 harvest photo'),
     saveTitle: 'Do you know this variety?',
     saveLead: 'Save the photo under its name: the phone will use it to recognise the next ones.',
     saveName: 'Variety name',
@@ -103,10 +125,30 @@ const STRINGS = {
     saved: (name) => `Photo saved as “${name}”.`,
     undo: 'Undo',
     saveFailed: 'The photo could not be saved on this phone.',
-    libraryOpen: (n) => `Your saved photos (${n})`,
-    libraryTitle: 'Your saved photos',
-    libraryLead: 'They stay on this phone and help recognise your varieties. Remove any photo saved under the wrong name.',
-    libraryEmpty: 'No saved photos yet.',
+    libraryOpen: (n) => (n ? `Your photos (${n})` : 'Your photos'),
+    libraryTitle: 'Your photos',
+    libraryLead: 'They stay on this phone and help recognise your varieties.',
+    harvestTitle: 'Photos from Carnet de récolte',
+    harvestLead: 'In Carnet de récolte, open Backup, tick “Include photos already backed up” and save the file or files. Import them here: Pomologue keeps a small picture and the description of each photo.',
+    harvestImport: 'Import a harvest backup',
+    harvestReading: 'Reading the backup…',
+    harvestWaiting: 'The photos will be described once the model is ready.',
+    harvestProgress: (done, total) => `Describing harvest photos: ${done} of ${total}…`,
+    harvestDone: (added, known) => {
+      const first = added > 1 ? `${added} photos added` : added === 1 ? '1 photo added' : 'No new photos';
+      const second = known ? `, ${known} already here` : '';
+      return `${first}${second}.`;
+    },
+    harvestFailed: (n) => (n > 1 ? `${n} photos could not be read.` : '1 photo could not be read.'),
+    harvestFull: 'The phone has no room left to keep these photos.',
+    notBackup: 'This file is not a Carnet de récolte backup.',
+    unreadable: 'This backup could not be read.',
+    harvestDirect: 'Photos from Carnet de récolte on this phone are read directly: new ones arrive by themselves.',
+    harvestEmpty: 'No harvest photos yet.',
+    harvestForget: 'Forget the imported photos',
+    harvestForgetConfirm: (n) => `Forget the ${n} imported photos? They stay in Carnet de récolte.`,
+    savedTitle: 'Saved in Pomologue',
+    libraryEmpty: 'No photos saved here yet.',
     remove: 'Remove',
     removeConfirm: (name) => `Remove this photo of “${name}”?`,
     back: 'Back',
@@ -114,10 +156,12 @@ const STRINGS = {
 };
 
 const $ = (selector) => document.querySelector(selector);
+const element = (tag, props = {}) => Object.assign(document.createElement(tag), props);
 const INPUT_SIZE = 224;
 const MAX_PHOTO_SIDE = 1600;
 const MAX_ATTEMPTS = 3;
-const ERRORS = new Set(['failed', 'downloadFailed', 'badPhoto', 'identifyFailed']);
+const ERRORS = new Set(['failed', 'downloadFailed', 'badPhoto', 'identifyFailed', 'notBackup', 'unreadable', 'harvestFull']);
+let resultUrls = []; // pictures shown with the current result
 
 const state = {
   lang: readLanguage(),
@@ -158,6 +202,7 @@ function applyLanguage() {
   });
   $('#lang').textContent = state.lang === 'fr' ? 'EN' : 'FR';
   renderStatus();
+  renderHarvestStatus();
   updateLibraryButton();
   if (state.result) renderResult();
   if (!$('#screen-library').hidden) renderLibrary();
@@ -352,6 +397,9 @@ function modelStopped(step, message) {
   console.error('Model stopped:', step, message);
   worker.terminate();
   worker = null;
+  // Harvest photos being described are tried again once the model is back.
+  for (const waiting of describing.values()) waiting.reject(Object.assign(new Error(message), { stopped: true }));
+  describing.clear();
   const wasBusy = state.busy;
   state.ready = false;
   state.busy = false;
@@ -386,6 +434,9 @@ function onWorkerMessage({ data }) {
     $('#meter').hidden = true;
     setModelStatus('ready');
     updateIdentifyButton();
+    updateLibraryButton();
+    processHarvest();
+    syncCarnet();
   } else if (data.type === 'result') {
     state.busy = false;
     state.result = data;
@@ -395,6 +446,12 @@ function onWorkerMessage({ data }) {
     updateIdentifyButton();
     renderResult();
     show('result');
+  } else if (data.type === 'described' || (data.type === 'error' && data.id)) {
+    const waiting = describing.get(data.id);
+    if (!waiting) return;
+    describing.delete(data.id);
+    if (data.type === 'described') waiting.resolve(data.vector);
+    else waiting.reject(new Error(data.message));
   } else if (data.type === 'error' && data.step === 'photo') {
     state.busy = false;
     updateIdentifyButton();
@@ -447,10 +504,20 @@ function renderResult() {
   kicker.textContent = sure ? t('sure') : t('unsure');
   kicker.className = `kicker ${sure ? 'sure' : 'unsure'}`;
   $('#verdict-name').textContent = sure ? top.name : t('unsureName');
-  // Without saved photos, the note points to the feature that helps most.
-  $('#verdict-note').textContent = sure ? t('sureNote') : t(Labelled.count ? 'unsureNoteMine' : 'unsureNote');
+  // Without photos of their own, the note points to the features that help most.
+  $('#verdict-note').textContent = sure ? t('sureNote') : t(state.mine.length ? 'unsureNoteMine' : 'unsureNote');
   $('#mine').hidden = !state.mine.length;
-  $('#mine-matches').replaceChildren(...state.mine.map(({ name, count }) => matchItem(name, t('photoCount')(count))));
+  resultUrls.forEach((url) => URL.revokeObjectURL(url));
+  resultUrls = [];
+  $('#mine-matches').replaceChildren(...state.mine.map(({ name, saved, harvest: fromHarvest, thumb }) => {
+    const counts = [fromHarvest && t('harvestCount')(fromHarvest), saved && t('photoCount')(saved)].filter(Boolean);
+    let url = null;
+    if (thumb instanceof Blob) {
+      url = URL.createObjectURL(thumb);
+      resultUrls.push(url);
+    }
+    return matchItem(name, counts.join(' · '), url);
+  }));
   $('#list-title').textContent = t('closest');
   $('#matches').replaceChildren(...ranked.map(({ index }) => {
     const variety = state.varieties[index];
@@ -459,24 +526,33 @@ function renderResult() {
   renderSave();
 }
 
-function matchItem(name, meta) {
+/* `picture`, when given, is the visitor's own closest photo of that variety, to compare with the fruit. */
+function matchItem(name, meta, picture = null) {
   const item = document.createElement('li');
+  const text = document.createElement('div');
   const title = document.createElement('span');
   title.className = 'match-name';
   title.textContent = name;
-  item.append(title);
+  text.append(title);
   if (meta) {
     const line = document.createElement('span');
     line.className = 'match-meta';
     line.textContent = meta;
-    item.append(line);
+    text.append(line);
   }
+  if (picture) {
+    item.className = 'with-picture';
+    item.append(element('img', { src: picture, alt: '', width: 224, height: 224 }));
+  }
+  item.append(text);
   return item;
 }
 
 /* Saving */
 
-const element = (tag, props = {}) => Object.assign(document.createElement(tag), props);
+const toJpeg = (canvas, quality) => new Promise((resolve, reject) => {
+  canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('the picture could not be made'))), 'image/jpeg', quality);
+});
 
 function renderSave() {
   const { saved } = state;
@@ -517,9 +593,7 @@ async function saveResult(event) {
   try {
     // A catalogue name, however it is typed, is saved with the catalogue's spelling.
     const known = state.varieties.find((variety) => Labelled.nameKey(variety.name) === Labelled.nameKey(typed));
-    const thumb = await new Promise((resolve, reject) => {
-      $('#thumb').toBlob((blob) => (blob ? resolve(blob) : reject(new Error('the picture could not be made'))), 'image/jpeg', 0.85);
-    });
+    const thumb = await toJpeg($('#thumb'), 0.85);
     const record = await Labelled.add({
       name: known ? known.name : typed,
       varietyId: known ? known.id : null,
@@ -559,15 +633,44 @@ async function undoSave() {
 
 let thumbUrls = [];
 
+const HARVEST_THUMBS = 6; // per variety: the harvest app holds the full set
+
 function updateLibraryButton() {
   const button = $('#open-library');
-  button.hidden = !Labelled.available || !Labelled.count;
-  button.textContent = t('libraryOpen')(Labelled.count);
+  // Always there once storage works, since it also leads to the harvest import.
+  button.hidden = !Labelled.available;
+  button.textContent = t('libraryOpen')(Labelled.count + Labelled.harvestCount(state.tag));
+}
+
+function thumbItem(photo, name) {
+  const item = element('li');
+  if (photo.thumb instanceof Blob) {
+    const url = URL.createObjectURL(photo.thumb);
+    thumbUrls.push(url);
+    item.append(element('img', { src: url, alt: name, width: 224, height: 224 }));
+  }
+  return item;
 }
 
 function renderLibrary() {
   thumbUrls.forEach((url) => URL.revokeObjectURL(url));
   thumbUrls = [];
+
+  const harvestGroups = state.tag ? Labelled.harvestGroups(state.tag) : [];
+  $('#harvest-direct').hidden = !Labelled.harvestIds('carnet').length;
+  $('#harvest-forget').hidden = !Labelled.harvestIds('backup').length || harvest.running;
+  $('#harvest-list').replaceChildren(...(harvestGroups.length
+    ? harvestGroups.flatMap((group) => {
+      const grid = element('ul', { className: 'thumbs' });
+      group.photos.slice(0, HARVEST_THUMBS).forEach((photo) => grid.append(thumbItem(photo, group.name)));
+      return [
+        element('h3', { textContent: group.name }),
+        element('p', { className: 'match-meta', textContent: t('harvestCount')(group.photos.length) }),
+        grid,
+      ];
+    })
+    : [element('p', { className: 'note', textContent: t('harvestEmpty') })]));
+
   const groups = Labelled.groups();
   if (!groups.length) {
     $('#library').replaceChildren(element('p', { className: 'note', textContent: t('libraryEmpty') }));
@@ -576,12 +679,7 @@ function renderLibrary() {
   $('#library').replaceChildren(...groups.flatMap((group) => {
     const grid = element('ul', { className: 'thumbs' });
     for (const photo of group.photos) {
-      const item = element('li');
-      if (photo.thumb instanceof Blob) {
-        const url = URL.createObjectURL(photo.thumb);
-        thumbUrls.push(url);
-        item.append(element('img', { src: url, alt: group.name, width: 224, height: 224 }));
-      }
+      const item = thumbItem(photo, group.name);
       const remove = element('button', { type: 'button', className: 'remove', textContent: '×' });
       remove.setAttribute('aria-label', t('remove'));
       remove.addEventListener('click', () => removePhoto(photo.id, group.name));
@@ -589,7 +687,7 @@ function renderLibrary() {
       grid.append(item);
     }
     return [
-      element('h2', { textContent: group.name }),
+      element('h3', { textContent: group.name }),
       element('p', { className: 'match-meta', textContent: t('photoCount')(group.photos.length) }),
       grid,
     ];
@@ -611,7 +709,218 @@ async function removePhoto(id, name) {
 
 function openLibrary() {
   renderLibrary();
+  renderHarvestStatus();
   show('library');
+}
+
+/* Harvest photos, from Carnet de récolte */
+
+const harvest = {
+  queue: [], // photos waiting to be described, each with an image() that reads it when needed
+  running: false,
+  reading: false,
+  syncing: false,
+  batch: null, // counts for the photos queued since the queue was last empty
+  notice: null, // { key, detail } when a chosen file could not be read
+  closeDirect: null, // closes the harvest app's storage once its photos are described
+};
+const describing = new Map();
+let nextRequest = 1;
+
+function newBatch() {
+  harvest.batch = { total: 0, done: 0, added: 0, known: 0, failed: 0, error: null, detail: null };
+  harvest.notice = null;
+}
+newBatch();
+
+function describePixels(pixels) {
+  return new Promise((resolve, reject) => {
+    if (!worker || !state.ready) {
+      reject(Object.assign(new Error('the model is not ready'), { stopped: true }));
+      return;
+    }
+    const id = nextRequest;
+    nextRequest += 1;
+    describing.set(id, { resolve, reject });
+    worker.postMessage({ type: 'describe', id, pixels }, [pixels.buffer]);
+  });
+}
+
+/* The centre square, as a photo to identify is framed before it is moved or zoomed. */
+async function harvestPixels(blob) {
+  const photo = await loadPhoto(blob);
+  const side = Math.min(photo.width, photo.height);
+  const canvas = element('canvas', { width: INPUT_SIZE, height: INPUT_SIZE });
+  const context = canvas.getContext('2d', { willReadFrequently: true });
+  context.imageSmoothingQuality = 'high';
+  context.drawImage(photo, (photo.width - side) / 2, (photo.height - side) / 2, side, side, 0, 0, INPUT_SIZE, INPUT_SIZE);
+  const thumb = await toJpeg(canvas, 0.8);
+  return { pixels: context.getImageData(0, 0, INPUT_SIZE, INPUT_SIZE).data, thumb };
+}
+
+function enqueueHarvest(photos, source) {
+  if (!harvest.queue.length && !harvest.running) newBatch();
+  const queued = new Set(harvest.queue.map((item) => item.id));
+  for (const photo of photos) {
+    if (queued.has(photo.id)) continue;
+    queued.add(photo.id);
+    harvest.queue.push({ ...photo, source });
+    harvest.batch.total += 1;
+  }
+  processHarvest();
+}
+
+/* One photo at a time, so a photo to identify never waits long behind them. */
+async function processHarvest() {
+  if (harvest.running) return;
+  if (!state.ready || !harvest.queue.length) {
+    renderHarvestStatus();
+    return;
+  }
+  harvest.running = true;
+  const { batch } = harvest;
+  renderHarvestStatus();
+  try {
+    while (harvest.queue.length && state.ready) {
+      const item = harvest.queue[0];
+      try {
+        if (Labelled.harvestPhoto(item.id, state.tag)) {
+          await Labelled.refreshHarvest([item]); // already here: only its name or details may have changed
+          batch.known += 1;
+        } else {
+          const { pixels, thumb } = await harvestPixels(await item.image());
+          const vector = await describePixels(pixels);
+          await Labelled.putHarvest({ ...item, tag: state.tag, vector, thumb });
+          batch.added += 1;
+        }
+      } catch (error) {
+        if (error && error.stopped) break; // the model stopped: tried again once it is back
+        console.error('Harvest photo not added:', item.id, error);
+        if (error && error.name === 'QuotaExceededError') {
+          batch.error = 'harvestFull';
+          batch.failed += harvest.queue.length;
+          batch.done = batch.total;
+          harvest.queue = [];
+          break;
+        }
+        batch.failed += 1;
+        batch.detail = errorText(error);
+      }
+      harvest.queue.shift();
+      batch.done += 1;
+      renderHarvestStatus();
+    }
+  } finally {
+    harvest.running = false;
+    if (!harvest.queue.length && harvest.closeDirect) {
+      harvest.closeDirect();
+      harvest.closeDirect = null;
+    }
+    renderHarvestStatus();
+    updateLibraryButton();
+    if (!$('#screen-library').hidden) renderLibrary();
+  }
+}
+
+function renderHarvestStatus() {
+  const { batch, notice } = harvest;
+  const parts = [];
+  let detail = null;
+  if (harvest.reading) parts.push(t('harvestReading'));
+  else if (harvest.queue.length && !state.ready) parts.push(t('harvestWaiting'));
+  else if (harvest.queue.length || harvest.running) parts.push(t('harvestProgress')(batch.done, batch.total));
+  else if (batch.error) {
+    parts.push(t(batch.error));
+    detail = batch.detail;
+  } else if (batch.total) {
+    parts.push(t('harvestDone')(batch.added, batch.known));
+    if (batch.failed) {
+      parts.push(t('harvestFailed')(batch.failed));
+      detail = batch.detail;
+    }
+  }
+  if (notice && !harvest.reading) {
+    parts.push(t(notice.key));
+    detail = notice.detail;
+  }
+  const node = $('#harvest-status');
+  node.textContent = parts.join(' ');
+  node.classList.toggle('error', Boolean(batch.error || (notice && !harvest.reading)));
+  const extra = $('#harvest-detail');
+  extra.hidden = !detail;
+  extra.textContent = detail ? t('errorDetail')(detail) : '';
+}
+
+async function importBackups(input) {
+  const files = [...input.files];
+  input.value = '';
+  if (!files.length || harvest.reading) return;
+  harvest.reading = true;
+  if (!harvest.queue.length && !harvest.running) newBatch(); // the message then covers this import only
+  harvest.notice = null;
+  renderHarvestStatus();
+  const photos = [];
+  let problem = null;
+  for (const file of files) {
+    try {
+      photos.push(...(await Carnet.readBackup(file)).photos);
+    } catch (error) {
+      console.error('Backup not read:', file.name, error);
+      problem = {
+        key: error instanceof Carnet.BackupError ? error.key : 'unreadable',
+        detail: `${file.name}: ${errorText(error)}`,
+      };
+    }
+  }
+  harvest.reading = false;
+  if (!photos.length && !problem) problem = { key: 'notBackup', detail: 'no photos' };
+  if (photos.length) enqueueHarvest(photos, 'backup');
+  harvest.notice = problem; // after queueing, which starts a new message
+  renderHarvestStatus();
+}
+
+async function forgetHarvest() {
+  const ids = Labelled.harvestIds('backup');
+  if (!ids.length || harvest.running || !window.confirm(t('harvestForgetConfirm')(ids.length))) return;
+  try {
+    await Labelled.removeHarvest(ids);
+  } catch (error) {
+    console.error('Harvest photos not removed:', error);
+    return;
+  }
+  newBatch();
+  harvest.notice = null;
+  renderHarvestStatus();
+  renderLibrary();
+  updateLibraryButton();
+}
+
+/* Where this browser shares storage with the harvest app, its photos are read directly, and photos
+   deleted there are dropped here too. Its storage is only read, never changed. */
+async function syncCarnet() {
+  if (!state.ready || !Labelled.available || harvest.syncing || harvest.running || harvest.queue.length) return;
+  harvest.syncing = true;
+  try {
+    const found = await Carnet.readDirect();
+    if (!found) return;
+    const present = new Set(found.photos.map((photo) => photo.id));
+    await Labelled.removeHarvest(Labelled.harvestIds('carnet').filter((id) => !present.has(id)));
+    const photos = found.photos.map((photo) => ({ ...photo, source: 'carnet' }));
+    await Labelled.refreshHarvest(photos);
+    const fresh = photos.filter((photo) => !Labelled.harvestPhoto(photo.id, state.tag));
+    if (fresh.length && !harvest.running && !harvest.queue.length) {
+      harvest.closeDirect = found.close;
+      enqueueHarvest(fresh, 'carnet');
+    } else {
+      found.close();
+    }
+    updateLibraryButton();
+    if (!$('#screen-library').hidden) renderLibrary();
+  } catch (error) {
+    console.error('Carnet de récolte not read:', error);
+  } finally {
+    harvest.syncing = false;
+  }
 }
 
 function reset() {
@@ -637,7 +946,16 @@ async function start() {
   $('#save-undo').addEventListener('click', undoSave);
   $('#open-library').addEventListener('click', openLibrary);
   $('#library-back').addEventListener('click', () => show('start'));
-  Labelled.load().then(updateLibraryButton);
+  $('#harvest-file').addEventListener('change', (event) => importBackups(event.target));
+  $('#harvest-forget').addEventListener('click', forgetHarvest);
+  // Back from the harvest app, perhaps with new photos.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') syncCarnet();
+  });
+  Labelled.load().then(() => {
+    updateLibraryButton();
+    syncCarnet();
+  });
   $('#lang').addEventListener('click', () => {
     state.lang = state.lang === 'fr' ? 'en' : 'fr';
     try { localStorage.setItem('lang', state.lang); } catch (_) { /* optional */ }
