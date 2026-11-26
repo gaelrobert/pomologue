@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Pomologue</title>
+  <meta name="description" content="Identifier une variété de pomme à partir d'une photo, directement sur le téléphone.">
+  <meta name="theme-color" content="#233d2b">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <header class="bar">
+    <button class="brand" id="home" type="button">Pomologue</button>
+    <button class="lang" id="lang" type="button" aria-label="Language">EN</button>
+  </header>
+
+  <main>
+    <section id="screen-start" class="screen">
+      <h1 data-t="headline"></h1>
+      <p class="lead" data-t="lead"></p>
+      <div class="actions">
+        <label class="button primary" id="take-label">
+          <span data-t="take"></span>
+          <input id="take" type="file" accept="image/*" capture="environment">
+        </label>
+        <label class="button">
+          <span data-t="choose"></span>
+          <input id="choose" type="file" accept="image/*">
+        </label>
+        <button class="button" id="open-library" type="button" hidden></button>
+      </div>
+      <p class="status" id="status" role="status"></p>
+      <p class="status-detail" id="status-detail" hidden></p>
+      <div class="meter" id="meter" hidden><div id="meter-fill"></div></div>
+      <h2 data-t="tipsTitle"></h2>
+      <ol class="tips">
+        <li data-t="tip1"></li>
+        <li data-t="tip2"></li>
+        <li data-t="tip3"></li>
+      </ol>
+    </section>
+
+    <section id="screen-frame" class="screen" hidden>
+      <h1 data-t="frameTitle"></h1>
+      <p class="lead" data-t="frameLead"></p>
+      <div class="stage" id="stage">
+        <canvas id="crop"></canvas>
+        <div class="guide" aria-hidden="true"></div>
+      </div>
+      <label class="zoom">
+        <span data-t="zoom"></span>
+        <input id="zoom" type="range" min="1" max="4" step="0.01" value="1">
+      </label>
+      <div class="actions">
+        <button class="button primary" id="identify" type="button" data-t="identify"></button>
+        <button class="button" id="cancel" type="button" data-t="cancel"></button>
+      </div>
+    </section>
+
+    <section id="screen-result" class="screen" hidden>
+      <div class="verdict">
+        <canvas id="thumb" width="224" height="224"></canvas>
+        <div>
+          <p class="kicker" id="kicker"></p>
+          <h1 id="verdict-name"></h1>
+        </div>
+      </div>
+      <p class="note" id="verdict-note"></p>
+      <div id="mine" hidden>
+        <h2 data-t="mineTitle"></h2>
+        <ol class="matches" id="mine-matches"></ol>
+      </div>
+      <h2 id="list-title"></h2>
+      <ol class="matches" id="matches"></ol>
+      <form class="save" id="save-form" autocomplete="off">
+        <h2 data-t="saveTitle"></h2>
+        <p class="save-lead" data-t="saveLead"></p>
+        <div class="save-row">
+          <input id="save-name" name="variety" list="variety-names" maxlength="80" autocapitalize="words" enterkeyhint="done" data-tp="saveName">
+          <button class="button primary" id="save-button" type="submit" data-t="save"></button>
+        </div>
+        <div class="chips" id="save-chips"></div>
+        <datalist id="variety-names"></datalist>
+      </form>
+      <div class="save-done" id="save-done" role="status" hidden>
+        <p><span id="save-done-text"></span> <button class="link" id="save-undo" type="button" data-t="undo"></button></p>
+        <p class="status-detail" id="save-detail" hidden></p>
+      </div>
+      <p class="caution" data-t="caution"></p>
+      <div class="actions">
+        <button class="button primary" id="again" type="button" data-t="again"></button>
+      </div>
+    </section>
+
+    <section id="screen-library" class="screen" hidden>
+      <h1 data-t="libraryTitle"></h1>
+      <p class="lead" data-t="libraryLead"></p>
+      <div id="library"></div>
+      <div class="actions">
+        <button class="button" id="library-back" type="button" data-t="back"></button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span data-t="credit"></span>
+    <a href="https://pomologie.com/" target="_blank" rel="noopener">pomologie.com</a>,
+    <a href="https://www.aocidricoles.fr/" target="_blank" rel="noopener">Arborithèque de Normandie</a>,
+    <a href="https://www.aphn.net/" target="_blank" rel="noopener">APHN</a>,
+    <a href="https://www.fermedes3vergers.fr/" target="_blank" rel="noopener">Ferme des 3 Vergers</a>,
+    <span data-t="creditBooklet"></span>
+  </footer>
+  <script src="labelled.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
