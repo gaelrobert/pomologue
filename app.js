@@ -225,21 +225,42 @@ function drawCrop() {
   context.drawImage(state.bitmap, left, top, side, side, 0, 0, pixels, pixels);
 }
 
+/* The photo, upright and at most MAX_PHOTO_SIDE pixels wide, on a canvas. As in the harvest app,
+   which works on iPhones: Safari lacks some createImageBitmap options, so an image element is the
+   fallback, and the photo is shrunk by drawing it rather than with resize options. Drawing straight
+   into the small canvas also avoids a full-size one, which Safari refuses above about 16 megapixels. */
+async function loadPhoto(file) {
+  let source = null;
+  let url = null;
+  try {
+    try {
+      source = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    } catch (_) {
+      url = URL.createObjectURL(file);
+      source = new Image();
+      source.src = url;
+      await source.decode(); // drawn upright: images follow the photo's orientation by default
+    }
+    const width = source.naturalWidth || source.width;
+    const height = source.naturalHeight || source.height;
+    const scale = Math.min(1, MAX_PHOTO_SIDE / Math.max(width, height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(width * scale));
+    canvas.height = Math.max(1, Math.round(height * scale));
+    const context = canvas.getContext('2d');
+    context.imageSmoothingQuality = 'high';
+    context.drawImage(source, 0, 0, canvas.width, canvas.height);
+    return canvas;
+  } finally {
+    if (source && source.close) source.close();
+    if (url) URL.revokeObjectURL(url);
+  }
+}
+
 async function openPhoto(file) {
   if (!file) return;
   try {
-    const probe = await createImageBitmap(file, { imageOrientation: 'from-image' });
-    const ratio = Math.min(1, MAX_PHOTO_SIDE / Math.max(probe.width, probe.height));
-    let bitmap = probe;
-    if (ratio < 1) {
-      bitmap = await createImageBitmap(probe, {
-        resizeWidth: Math.round(probe.width * ratio),
-        resizeHeight: Math.round(probe.height * ratio),
-        resizeQuality: 'high',
-      });
-      probe.close();
-    }
-    if (state.bitmap) state.bitmap.close();
+    const bitmap = await loadPhoto(file);
     Object.assign(state, { bitmap, zoom: 1, x: 0.5, y: 0.5, result: null });
     $('#zoom').value = 1;
     show('frame');
