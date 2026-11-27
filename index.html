@@ -107,12 +107,24 @@
       </label>
       <p class="status" id="harvest-status" role="status"></p>
       <p class="status-detail" id="harvest-detail" hidden></p>
+      <button class="button" id="open-check" type="button" data-t="checkOpen" hidden></button>
       <div id="harvest-list"></div>
       <button class="link" id="harvest-forget" type="button" data-t="harvestForget" hidden></button>
       <h2 data-t="savedTitle"></h2>
       <div id="library"></div>
       <div class="actions">
         <button class="button" id="library-back" type="button" data-t="back"></button>
+      </div>
+    </section>
+
+    <section id="screen-check" class="screen" hidden>
+      <h1 data-t="checkTitle"></h1>
+      <p class="lead" data-t="checkLead"></p>
+      <p class="status" id="check-busy" role="status" data-t="checkBusy" hidden></p>
+      <div id="check-body"></div>
+      <p class="caution" data-t="checkCaution"></p>
+      <div class="actions">
+        <button class="button" id="check-back" type="button" data-t="back"></button>
       </div>
     </section>
   </main>

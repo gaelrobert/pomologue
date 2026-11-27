@@ -157,42 +157,110 @@ const Labelled = (() => {
 
   /* Comparing */
 
-  /* The visitor's varieties, closest first: each variety scores as its closest view, where a view
-     is the average of its photos (side, stalk end, eye end, or photos saved here). */
-  function rank(query, tag, limit = 3) {
+  /* Photos by variety, with the summed descriptions of each view: side, stalk end, eye end, or
+     'saved' for photos saved here. */
+  function gather(list, length) {
     const varieties = new Map();
-    for (const photo of [...photos, ...harvest]) {
-      if (photo.tag !== tag || photo.vector.length !== query.length) continue;
+    for (const photo of list) {
+      if (photo.vector.length !== length) continue;
       if (!varieties.has(photo.key)) {
-        varieties.set(photo.key, { name: photo.name, saved: 0, harvest: 0, views: new Map(), closest: null, closestScore: -2 });
+        varieties.set(photo.key, { name: photo.name, photos: [], saved: 0, harvest: 0, views: new Map() });
       }
       const variety = varieties.get(photo.key);
-      const fromHarvest = Boolean(photo.source);
-      variety[fromHarvest ? 'harvest' : 'saved'] += 1;
-      const view = fromHarvest ? photo.view || 'any' : 'saved';
-      if (!variety.views.has(view)) variety.views.set(view, new Float64Array(query.length));
+      variety.photos.push(photo);
+      variety[photo.source ? 'harvest' : 'saved'] += 1;
+      const view = photo.source ? photo.view || 'any' : 'saved';
+      if (!variety.views.has(view)) variety.views.set(view, new Float64Array(length));
       const sum = variety.views.get(view);
-      let score = 0;
-      for (let i = 0; i < query.length; i += 1) {
-        sum[i] += photo.vector[i];
-        score += photo.vector[i] * query[i];
-      }
-      // The single closest photo is shown next to the name, to compare with the fruit.
-      if (score > variety.closestScore) { variety.closest = photo; variety.closestScore = score; }
+      for (let i = 0; i < length; i += 1) sum[i] += photo.vector[i];
     }
-    return [...varieties.values()].map(({ name, saved, harvest: fromHarvest, views, closest }) => {
-      let best = -1;
-      for (const sum of views.values()) {
-        let dot = 0;
-        let length = 0;
-        for (let i = 0; i < sum.length; i += 1) {
-          dot += sum[i] * query[i];
-          length += sum[i] * sum[i];
-        }
-        best = Math.max(best, dot / (Math.sqrt(length) || 1));
+    return varieties;
+  }
+
+  /* A variety scores as its closest view, where a view is the average of its photos. */
+  function scoreOf(variety, query) {
+    let best = -1;
+    for (const sum of variety.views.values()) {
+      let dot = 0;
+      let length = 0;
+      for (let i = 0; i < sum.length; i += 1) {
+        dot += sum[i] * query[i];
+        length += sum[i] * sum[i];
       }
-      return { name, saved, harvest: fromHarvest, score: best, thumb: closest && closest.thumb };
+      best = Math.max(best, dot / (Math.sqrt(length) || 1));
+    }
+    return best;
+  }
+
+  /* The visitor's varieties, closest first. */
+  function rank(query, tag, limit = 3) {
+    const varieties = gather([...photos, ...harvest].filter((photo) => photo.tag === tag), query.length);
+    return [...varieties.values()].map((variety) => {
+      // The single closest photo is shown next to the name, to compare with the fruit.
+      let closest = null;
+      let closestScore = -2;
+      for (const photo of variety.photos) {
+        let score = 0;
+        for (let i = 0; i < query.length; i += 1) score += photo.vector[i] * query[i];
+        if (score > closestScore) { closest = photo; closestScore = score; }
+      }
+      return {
+        name: variety.name,
+        saved: variety.saved,
+        harvest: variety.harvest,
+        score: scoreOf(variety, query),
+        thumb: closest && closest.thumb,
+      };
     }).sort((a, b) => b.score - a.score).slice(0, limit);
+  }
+
+  /* The recognition check, as Carnet de récolte used to do it: each variety is learnt from its
+     harvest photos of its first two picking days, then each photo from a later day is ranked like
+     an apple to identify, against what was learnt. Test photos are never learnt. Photos saved here
+     have no picking day and are left out. */
+  function selfTest(tag) {
+    const list = harvest.filter((photo) => photo.tag === tag && photo.day);
+    const days = new Map();
+    for (const photo of list) {
+      if (!days.has(photo.key)) days.set(photo.key, new Set());
+      days.get(photo.key).add(photo.day);
+    }
+    const firstDays = new Map([...days].map(([key, set]) => [key, [...set].sort().slice(0, 2)]));
+    const isTest = (photo) => !firstDays.get(photo.key).includes(photo.day);
+    const length = list.length ? list[0].vector.length : 0;
+    const learnt = gather(list.filter((photo) => !isTest(photo)), length);
+    const keys = [...learnt.keys()];
+    const perVariety = new Map(keys.map((key) => [key, { name: learnt.get(key).name, test: 0, correct: 0, mistakes: new Map() }]));
+    const result = { varieties: keys.length, photos: 0, top1: 0, top3: 0 };
+    for (const photo of list) {
+      // A test day always comes after two learning days, so its variety has been learnt.
+      if (!isTest(photo) || photo.vector.length !== length || !learnt.has(photo.key)) continue;
+      const own = scoreOf(learnt.get(photo.key), photo.vector);
+      let ahead = 0; // other varieties scoring as high or higher: ties count against
+      let first = null;
+      let firstScore = -Infinity;
+      for (const key of keys) {
+        if (key === photo.key) continue;
+        const score = scoreOf(learnt.get(key), photo.vector);
+        if (score >= own) ahead += 1;
+        if (score > firstScore) { first = key; firstScore = score; }
+      }
+      const entry = perVariety.get(photo.key);
+      entry.test += 1;
+      result.photos += 1;
+      if (ahead === 0) {
+        entry.correct += 1;
+        result.top1 += 1;
+      } else {
+        entry.mistakes.set(first, (entry.mistakes.get(first) || 0) + 1);
+      }
+      if (ahead < 3) result.top3 += 1;
+    }
+    result.perVariety = [...perVariety.values()].map(({ mistakes, ...entry }) => {
+      const [confusedWith = null, confusedCount = 0] = [...mistakes].sort((a, b) => b[1] - a[1])[0] || [];
+      return { ...entry, confusedWith: confusedWith && learnt.get(confusedWith).name, confusedCount };
+    }).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+    return result;
   }
 
   /* Listing */
@@ -216,6 +284,7 @@ const Labelled = (() => {
     refreshHarvest,
     removeHarvest,
     rank,
+    selfTest,
     nameKey,
     /* Saved photos by variety, varieties in alphabetical order, newest photo first. */
     groups: () => byVariety(photos, 'savedAt'),

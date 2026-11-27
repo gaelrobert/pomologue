@@ -71,6 +71,20 @@ const STRINGS = {
     harvestEmpty: 'Aucune photo du carnet pour l’instant.',
     harvestForget: 'Oublier les photos importées',
     harvestForgetConfirm: (n) => `Oublier les ${n} photos importées ? Elles restent dans le Carnet de récolte.`,
+    checkOpen: 'Bilan de reconnaissance',
+    checkTitle: 'Bilan de reconnaissance',
+    checkLead: 'Pomologue apprend chaque variété avec ses photos du carnet des deux premiers jours de cueillette, puis se teste sur les photos des jours suivants, qu’il n’a pas apprises. C’est la même comparaison que pour une pomme à identifier.',
+    checkBusy: 'Des photos du carnet sont en cours d’ajout : le bilan sera mis à jour.',
+    checkNeeds: 'Pas encore de bilan. Il faut au moins deux variétés photographiées deux jours dans le Carnet de récolte, puis des photos d’un troisième jour, importées ici.',
+    statTop1: 'Bonne variété en premier',
+    statTop3: 'Parmi les 3 premières',
+    statChance: 'Au hasard',
+    checkBasis: (photos, varieties) => `Sur ${photos > 1 ? `${photos} photos` : '1 photo'} de test, avec ${varieties} variétés au choix.`,
+    perVariety: 'Par variété',
+    varietyScore: (right, n) => `Reconnue ${right} fois sur ${n}`,
+    confusedWith: (name, n) => `confondue avec ${name} (${n} fois)`,
+    noTestYet: 'Pas encore de photos d’un troisième jour',
+    checkCaution: 'Avec peu de photos, ces chiffres varient beaucoup. Ils valent pour votre verger et vos conditions de prise de vue. Si une variété est toujours photographiée sur le même fond, le téléphone peut reconnaître le fond plutôt que la pomme. Les photos enregistrées dans Pomologue ne comptent pas ici.',
     savedTitle: 'Enregistrées dans Pomologue',
     libraryEmpty: 'Aucune photo enregistrée ici pour l’instant.',
     remove: 'Retirer',
@@ -147,6 +161,20 @@ const STRINGS = {
     harvestEmpty: 'No harvest photos yet.',
     harvestForget: 'Forget the imported photos',
     harvestForgetConfirm: (n) => `Forget the ${n} imported photos? They stay in Carnet de récolte.`,
+    checkOpen: 'Recognition check',
+    checkTitle: 'Recognition check',
+    checkLead: 'Pomologue learns each variety from its harvest photos of the first two picking days, then tests itself on photos from later days, which it has not learnt. It is the same comparison as for an apple you identify.',
+    checkBusy: 'Harvest photos are being added: the check will be updated.',
+    checkNeeds: 'No check yet. It needs at least two varieties photographed on two days in Carnet de récolte, then photos from a third day, imported here.',
+    statTop1: 'Right variety first',
+    statTop3: 'In the top 3',
+    statChance: 'By chance',
+    checkBasis: (photos, varieties) => `From ${photos > 1 ? `${photos} test photos` : '1 test photo'}, choosing among ${varieties} varieties.`,
+    perVariety: 'By variety',
+    varietyScore: (right, n) => `Recognised: ${right} of ${n}`,
+    confusedWith: (name, n) => `mistaken for ${name} (${n}×)`,
+    noTestYet: 'No photos from a third day yet',
+    checkCaution: 'With few photos, these figures vary a lot. They hold for your orchard and the way you take photos. If a variety is always photographed on the same background, the phone may recognise the background rather than the apple. Photos saved in Pomologue are not counted here.',
     savedTitle: 'Saved in Pomologue',
     libraryEmpty: 'No photos saved here yet.',
     remove: 'Remove',
@@ -206,6 +234,7 @@ function applyLanguage() {
   updateLibraryButton();
   if (state.result) renderResult();
   if (!$('#screen-library').hidden) renderLibrary();
+  if (!$('#screen-check').hidden) renderCheck();
 }
 
 const errorText = (error) => String((error && error.message) || error || '');
@@ -243,7 +272,7 @@ function renderStatus() {
 }
 
 function show(name) {
-  ['start', 'frame', 'result', 'library'].forEach((screen) => { $(`#screen-${screen}`).hidden = screen !== name; });
+  ['start', 'frame', 'result', 'library', 'check'].forEach((screen) => { $(`#screen-${screen}`).hidden = screen !== name; });
   window.scrollTo(0, 0);
 }
 
@@ -659,6 +688,7 @@ function renderLibrary() {
   const harvestGroups = state.tag ? Labelled.harvestGroups(state.tag) : [];
   $('#harvest-direct').hidden = !Labelled.harvestIds('carnet').length;
   $('#harvest-forget').hidden = !Labelled.harvestIds('backup').length || harvest.running;
+  $('#open-check').hidden = !harvestGroups.length;
   $('#harvest-list').replaceChildren(...(harvestGroups.length
     ? harvestGroups.flatMap((group) => {
       const grid = element('ul', { className: 'thumbs' });
@@ -711,6 +741,47 @@ function openLibrary() {
   renderLibrary();
   renderHarvestStatus();
   show('library');
+}
+
+/* Recognition check */
+
+const percent = (value) => new Intl.NumberFormat(state.lang === 'fr' ? 'fr-FR' : 'en-GB', { style: 'percent', maximumFractionDigits: 0 }).format(value);
+
+function renderCheck() {
+  const result = state.tag ? Labelled.selfTest(state.tag) : null;
+  if (!result || result.varieties < 2 || !result.photos) {
+    $('#check-body').replaceChildren(element('p', { className: 'note', textContent: t('checkNeeds') }));
+    return;
+  }
+  const stats = element('dl', { className: 'stats' });
+  [
+    [t('statTop1'), result.top1 / result.photos],
+    result.varieties >= 4 && [t('statTop3'), result.top3 / result.photos],
+    [t('statChance'), 1 / result.varieties],
+  ].filter(Boolean).forEach(([label, value]) => {
+    const tile = element('div');
+    tile.append(element('dt', { textContent: label }), element('dd', { textContent: percent(value) }));
+    stats.append(tile);
+  });
+  const rows = element('ul', { className: 'matches' });
+  for (const entry of result.perVariety) {
+    const meta = entry.test
+      ? [t('varietyScore')(entry.correct, entry.test), entry.confusedWith && t('confusedWith')(entry.confusedWith, entry.confusedCount)]
+      : [t('noTestYet')];
+    rows.append(matchItem(entry.name, meta.filter(Boolean).join(' · ')));
+  }
+  $('#check-body').replaceChildren(
+    stats,
+    element('p', { className: 'match-meta', textContent: t('checkBasis')(result.photos, result.varieties) }),
+    element('h2', { textContent: t('perVariety') }),
+    rows,
+  );
+}
+
+function openCheck() {
+  renderCheck();
+  renderHarvestStatus();
+  show('check');
 }
 
 /* Harvest photos, from Carnet de récolte */
@@ -819,6 +890,7 @@ async function processHarvest() {
     renderHarvestStatus();
     updateLibraryButton();
     if (!$('#screen-library').hidden) renderLibrary();
+    if (!$('#screen-check').hidden) renderCheck();
   }
 }
 
@@ -849,6 +921,7 @@ function renderHarvestStatus() {
   const extra = $('#harvest-detail');
   extra.hidden = !detail;
   extra.textContent = detail ? t('errorDetail')(detail) : '';
+  $('#check-busy').hidden = !harvest.queue.length && !harvest.running;
 }
 
 async function importBackups(input) {
@@ -916,6 +989,7 @@ async function syncCarnet() {
     }
     updateLibraryButton();
     if (!$('#screen-library').hidden) renderLibrary();
+    if (!$('#screen-check').hidden) renderCheck();
   } catch (error) {
     console.error('Carnet de récolte not read:', error);
   } finally {
@@ -948,6 +1022,8 @@ async function start() {
   $('#library-back').addEventListener('click', () => show('start'));
   $('#harvest-file').addEventListener('change', (event) => importBackups(event.target));
   $('#harvest-forget').addEventListener('click', forgetHarvest);
+  $('#open-check').addEventListener('click', openCheck);
+  $('#check-back').addEventListener('click', openLibrary);
   // Back from the harvest app, perhaps with new photos.
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') syncCarnet();
